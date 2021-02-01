@@ -1,0 +1,87 @@
+#munging and cleaning data 
+
+#load data
+Data <-  read_excel("/Volumes/dept$/Planning/Devon's Folder/RES 1359 Drop Points Analysis: Engineering (DPE)/data/DPE V2.xlsx", sheet = 1, col_names = T, guess_max = 100)
+
+#create new column for course code (ex: CHEM_1210)
+Data_clean <- Data %>% 
+  mutate(new_column = paste0(COURSE_SUBJECT, "_", COURSE_NUMBER)) 
+Data_clean <- Data_clean %>% rename(COURSE_CODE= new_column)
+
+#make column that creates a unique ID for students per course, this will let me sort out repeated courses later
+Data_clean <- Data_clean %>% mutate(new_column = paste0(BANNER_ID, "_", COURSE_CODE))
+Data_clean<-rename(Data_clean, UNIQUE_ID= new_column)
+
+#filter to include only these courses (this data set was already filtered when I got it, so counts did not change on this one)
+Data_clean <- Data_clean %>% 
+  filter(COURSE_CODE %in% c("CHEM_1210",
+"CEEN_110",
+"EE_1010",
+"EE_1020",
+"ENGR_1030",
+"ENGR_1035",
+"CHE_1040",
+"ENGR_2010",
+"ENGR_2950",
+"PHYS_2210",
+"PHYS_2210",
+"EE_1270",
+"MATH_1120",
+"MEEN_1000",
+"MEEN_1220",
+"ENGR_1040",
+"ENGR_2320",
+"CHEM_2310",
+"EE_2260",
+"ENGR_2550",
+"ENGR_2010",
+"MSE_2160",
+"ARCH_1310",
+"CEEN_2240",
+"ENGR_2550",
+"CHE_2800",
+"CHE_2450",
+"EE_2280",
+"ENGR_2450",
+"MEEN_2650",
+"MEEN_2655",
+"EE_2210",
+"ENGR_2030"))
+
+#make fields into factors
+DPE_Data_clean <- Data_clean %>% 
+    mutate_at(vars(UNIQUE_ID, BANNER_ID, COURSE_SUBJECT, COURSE_NUMBER, TERM_CODE, FINAL_GRADE, PASSED_IND, GENDER, FIRST_GENERATION_IND, ETHNICITY, EVER_PELL_ELIGIBLE_IND, DEGREE_SEEKING, TERM_PROGRAM_CODE, COURSE_CODE, RETURNED_NEXT_TERM_IND, SLCC_DEGREE, WENT_ELSEWHERE_AFTER_TERM_IND), as.factor)
+
+#narrow down fields further
+DPE_Data_clean <- DPE_Data_clean %>% dplyr::select (UNIQUE_ID, BANNER_ID, PASSED_IND, RETURNED_NEXT_TERM_IND, COURSE_CODE, SLCC_DEGREE, TERM_CODE, WENT_ELSEWHERE_AFTER_TERM_IND)
+
+#filter students for only courses in the last five years
+DPE_Data_clean <- DPE_Data_clean %>% 
+    filter(TERM_CODE == 201520 |
+           TERM_CODE == 201530 |
+           TERM_CODE == 201540 |
+           TERM_CODE == 201620 |
+           TERM_CODE == 201630 |
+           TERM_CODE == 201640 |
+           TERM_CODE == 201720 |
+           TERM_CODE == 201730 |
+           TERM_CODE == 201740 |
+           TERM_CODE == 201820 |
+           TERM_CODE == 201830 |
+           TERM_CODE == 201840 |
+           TERM_CODE == 201920 |
+           TERM_CODE == 201930 |
+           TERM_CODE == 201940 |
+           TERM_CODE == 202020 |
+           TERM_CODE == 202030 |
+           TERM_CODE == 202040 |
+           TERM_CODE == 202120)
+          
+#make table of courses by term
+#counts here include repeated students (ex: students who retook CHEM_1210 in a second term would show up in the counts for both terms here)
+stakeholder_check<-table(DPE_Data_clean$TERM_CODE,DPE_Data_clean$COURSE_CODE)
+
+#the file produced here is to check course counts for Stakeholder Data Check
+write.csv(stakeholder_check,"Stakeholder Data Check.csv", row.names = FALSE)
+
+
