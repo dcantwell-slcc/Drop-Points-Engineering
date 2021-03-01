@@ -1,0 +1,698 @@
+---
+title: "Data Munging"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#transforming variables into factors for analysis
+Check_Data <- DPE_Data_clean %>% 
+  mutate_at(vars(UNIQUE_ID, COURSE_CODE,TERM_CODE), as.factor)
+```
+
+```{r}
+#filter out non-degree seeking students
+Check_Data <- Check_Data %>% 
+ filter(DEGREE_SEEKING %in% c("Two-Year Degree", "One-Year Degree"))
+```
+
+
+```{r}
+#create levels for ME
+ME_level1<- Check_Data %>% filter(COURSE_CODE %in% c("CHEM_1210","ENGR_1030")) 
+
+#create count column
+ME_level1<-
+  ME_level1 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+ME_level1$level<-c("Level 1")
+
+#create levels for ME
+ME_level2<- Check_Data %>% filter(COURSE_CODE %in% c("MATH_1220","MEEN_1000")) 
+
+#create count column
+ME_level2<-
+  ME_level2 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+ME_level2$level<-c("Level 2")
+
+#create levels for ME
+ME_level3<- Check_Data %>% filter(COURSE_CODE %in% c("ENGR_2550","ENGR_2010")) 
+
+#create count column
+ME_level3<-
+  ME_level3 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+ME_level3$level<-c("Level 3")
+
+#create levels for ME
+ME_level4<- Check_Data %>% filter(COURSE_CODE %in% c("ENGR_2550","ENGR_2010")) 
+
+#create count column
+ME_level4<-
+  ME_level4 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 3)
+
+#add column that marks level
+ME_level4$level<-c("Level 4")
+
+#create merged frame with rows from all of these
+ME_all_levels<-rbind(ME_level1,ME_level2,ME_level3,ME_level4)
+
+```
+
+```{r}
+#create levels for EE
+EE_level1<- Check_Data %>% filter(COURSE_CODE %in% c("CHEM_1210","EE_1010")) 
+
+#create count column
+EE_level1<-
+  EE_level1 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+EE_level1$level<-c("Level 1")
+
+#create levels for EE
+EE_level2<- Check_Data %>% filter(COURSE_CODE %in% c("PHYS_2210","EE_1270")) 
+
+#create count column
+EE_level2<-
+  EE_level2 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+EE_level2$level<-c("Level 2")
+
+#create levels for EE
+EE_level3<- Check_Data %>% filter(COURSE_CODE %in% c("EE_2260")) 
+
+#create count column
+EE_level3<-
+  EE_level3 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 1)
+
+#add column that marks level
+EE_level3$level<-c("Level 3")
+
+#create levels for EE
+EE_level4<- Check_Data %>% filter(COURSE_CODE %in% c("EE_2280")) 
+
+#create count column
+EE_level4<-
+  EE_level4 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 1)
+
+#add column that marks level
+EE_level4$level<-c("Level 4")
+
+#create merged frame with rows from all of these
+EE_all_levels<-rbind(EE_level1,EE_level2,EE_level3,EE_level4)
+
+```
+
+```{r}
+
+#create levels for CE
+CE_level1<- Check_Data %>% filter(COURSE_CODE %in% c("CHEM_1210","CHE_1040")) 
+
+#create count column
+CE_level1<-
+  CE_level1 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+CE_level1$level<-c("Level 1")
+
+CE_level1<- CE_level1 %>% mutate(MERGE_ID = paste0(BANNER_ID,"_", level))
+
+#create levels for CE
+CE_level2<- Check_Data %>% filter(COURSE_CODE %in% c("CHEM_1220","PHYS_2210", "PHYS_2210")) 
+
+#create count column
+CE_level2<-
+  CE_level2 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 3)
+
+#add column that marks level
+CE_level2$level<-c("Level 2")
+
+CE_level2<- CE_level2 %>% mutate(MERGE_ID = paste0(BANNER_ID,"_", level))
+
+#create levels for CE
+CE_level3<- Check_Data %>% filter(COURSE_CODE %in% c("CHEM_2310","ENGR_2300")) 
+
+#create count column
+CE_level3<-
+  CE_level3 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+CE_level3$level<-c("Level 3")
+
+CE_level3<- CE_level3 %>% mutate(MERGE_ID = paste0(BANNER_ID,"_", level))
+
+#create levels for CE
+CE_level4<- Check_Data %>% filter(COURSE_CODE %in% c("CHE_2800","CHE_2450")) 
+
+#create count column
+CE_level4<-
+  CE_level4 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+CE_level4$level<-c("Level 4")
+
+CE_level4<- CE_level4 %>% mutate(MERGE_ID = paste0(BANNER_ID,"_", level))
+
+#create merged frame with rows from all of these
+CE_all_levels<-rbind(CE_level1,CE_level2,CE_level3,CE_level4)
+
+#rename graduation column
+CE_all_levels<-rename(CE_all_levels,GRADUATION= SLCC_DEGREE)
+
+#rename transfer column
+CE_all_levels<-rename(CE_all_levels,TRANSFER_IND= WENT_ELSEWHERE_AFTER_TERM_IND)
+
+#for this data frame, we are only keeping their earliest course in the progression to see how many students are doing the progression
+CE_all_levels <- CE_all_levels %>% 
+  dplyr::select(UNIQUE_ID, PASSED_IND, RETURNED_NEXT_TERM_IND, COURSE_CODE, GRADUATION, TERM_CODE, TRANSFER_IND) %>% 
+  # Make groups for each student + course combination
+  group_by(UNIQUE_ID, COURSE_CODE) %>% 
+  # Put the Ys at the top
+  arrange(TERM_CODE) %>% 
+  # Keep the first row only
+  slice(1)
+
+```
+
+```{r}
+
+#create levels for Civ
+Civ_level1<- Check_Data %>% filter(COURSE_CODE %in% c("CHEM_1210","CEEN_1100")) 
+
+#create count column
+Civ_level1<-
+  Civ_level1 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+Civ_level1$level<-c("Level 1")
+
+
+#create levels for Civ
+Civ_level2<- Check_Data %>% filter(COURSE_CODE %in% c("ENGR_2010","ENGR_2950")) 
+
+#create count column
+Civ_level2<-
+  Civ_level2 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+Civ_level2$level<-c("Level 2")
+
+#create levels for Civ
+Civ_level3<- Check_Data %>% filter(COURSE_CODE %in% c("ENGR_1040","ENGR_2320")) 
+
+#create count column
+Civ_level3<-
+  Civ_level3 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 2)
+
+#add column that marks level
+Civ_level3$level<-c("Level 3")
+
+#create levels for Civ
+Civ_level4<- Check_Data %>% filter(COURSE_CODE %in% c("ARCH_1310","CEEN_2240","ENGR_2550")) 
+
+#create count column
+Civ_level4<-
+  Civ_level4 %>%
+  group_by(BANNER_ID) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%  # To stop working in the groups
+  filter(count >= 3)
+
+#add column that marks level
+Civ_level4$level<-c("Level 4")
+
+#create merged frame with rows from all of these
+Civ_all_levels<-rbind(Civ_level1,Civ_level2,Civ_level3,Civ_level4)
+
+```
+
+```{r}
+#export the unique Banner IDs of all the students for each "all levels" data frame and create a "template" that should be their expected course level enrollments
+
+CE_students<-CE_all_levels %>% dplyr::select(BANNER_ID)
+
+#remove duplicates
+CE_students<-
+  CE_students %>%
+  distinct()
+
+#create duplicate columns that will be morphed in the level frames
+
+CE_students<- CE_students %>% 
+  mutate(Level_1 = BANNER_ID)
+
+CE_students<- CE_students %>% 
+  mutate(Level_2 = BANNER_ID)
+
+CE_students<- CE_students %>% 
+  mutate(Level_3 = BANNER_ID)
+
+CE_students<- CE_students %>% 
+  mutate(Level_4 = BANNER_ID)
+
+#create new column that uses ID number plus level
+
+CE_students <- CE_students %>% mutate(Level_1_Students = paste0(BANNER_ID, "_Level1" ))
+
+CE_students <- CE_students %>% mutate(Level_2_Students = paste0(BANNER_ID, "_Level2" ))
+
+CE_students <- CE_students %>% mutate(Level_3_Students = paste0(BANNER_ID, "_Level3" ))
+
+CE_students <- CE_students %>% mutate(Level_4_Students = paste0(BANNER_ID, "_Level4" ))
+
+#export the unique Banner IDs of all the students for each "all levels" data frame and create a "template" that should be their expected course level enrollments
+
+Civ_students<-Civ_all_levels %>% dplyr::select(BANNER_ID)
+
+#remove duplicates
+Civ_students<-
+  Civ_students %>%
+  distinct()
+
+#create duplicate columns that will be morphed in the level frames
+
+Civ_students<- Civ_students %>% 
+  mutate(Level_1 = BANNER_ID)
+
+Civ_students<- Civ_students %>% 
+  mutate(Level_2 = BANNER_ID)
+
+Civ_students<- Civ_students %>% 
+  mutate(Level_3 = BANNER_ID)
+
+Civ_students<- Civ_students %>% 
+  mutate(Level_4 = BANNER_ID)
+
+#create new column that uses ID number plus level
+
+Civ_students <- Civ_students %>% mutate(Level_1_Students = paste0(BANNER_ID, "_Level1" ))
+
+Civ_students <- Civ_students %>% mutate(Level_2_Students = paste0(BANNER_ID, "_Level2" ))
+
+Civ_students <- Civ_students %>% mutate(Level_3_Students = paste0(BANNER_ID, "_Level3" ))
+
+Civ_students <- Civ_students %>% mutate(Level_4_Students = paste0(BANNER_ID, "_Level4" ))
+
+#export the unique Banner IDs of all the students for each "all levels" data frame and create a "template" that should be their expected course level enrollments
+
+EE_students<-EE_all_levels %>% dplyr::select(BANNER_ID)
+
+#remove duplicates
+EE_students<-
+  EE_students %>%
+  distinct()
+
+#create duplicate columns that will be morphed in the level frames
+
+EE_students<- EE_students %>% 
+  mutate(Level_1 = BANNER_ID)
+
+EE_students<- EE_students %>% 
+  mutate(Level_2 = BANNER_ID)
+
+EE_students<- EE_students %>% 
+  mutate(Level_3 = BANNER_ID)
+
+EE_students<- EE_students %>% 
+  mutate(Level_4 = BANNER_ID)
+
+
+#create new column that uses ID number plus level
+
+EE_students <- EE_students %>% mutate(Level_1_Students = paste0(BANNER_ID, "_Level1" ))
+
+EE_students <- EE_students %>% mutate(Level_2_Students = paste0(BANNER_ID, "_Level2" ))
+
+EE_students <- EE_students %>% mutate(Level_3_Students = paste0(BANNER_ID, "_Level3" ))
+
+EE_students <- EE_students %>% mutate(Level_4_Students = paste0(BANNER_ID, "_Level4" ))
+
+#export the unique Banner IDs of all the students for each "all levels" data frame and create a "template" that should be their expected course level enrollments
+
+ME_students<-ME_all_levels %>% dplyr::select(BANNER_ID)
+
+#remove duplicates
+ME_students<-
+  ME_students %>%
+  distinct()
+
+ME_students<- ME_students %>% 
+  mutate(Level_1 = BANNER_ID)
+
+ME_students<- ME_students %>% 
+  mutate(Level_2 = BANNER_ID)
+
+ME_students<- ME_students %>% 
+  mutate(Level_3 = BANNER_ID)
+
+ME_students<- ME_students %>% 
+  mutate(Level_4 = BANNER_ID)
+
+
+#create new column that uses ID number plus level
+
+ME_students <- ME_students %>% mutate(Level_1_Students = paste0(BANNER_ID, "_Level1" ))
+
+ME_students <- ME_students %>% mutate(Level_2_Students = paste0(BANNER_ID, "_Level2" ))
+
+ME_students <- ME_students %>% mutate(Level_3_Students = paste0(BANNER_ID, "_Level3" ))
+
+ME_students <- ME_students %>% mutate(Level_4_Students = paste0(BANNER_ID, "_Level4" ))
+```
+
+####PROBLEM CHILD CODE HERE######
+
+```{r}
+library(tidyr)
+
+#combine data back together 
+CE_data_long <- gather(CE_students, Level_Indicator, UNIQUE_ID, Level_1_Students:Level_4_Students, factor_key=TRUE)
+
+CE_data_long<-CE_data_long %>% dplyr::select(BANNER_ID, UNIQUE_ID)
+
+
+#combine data back together 
+CE_Data <-CE_data_long %>% left_join(CE_all_levels, by="BANNER_ID")
+#I need to keep all the levels created in the CE_data_long but just add the columns from the CE_all_levels
+
+```
+
+
+
+```{r}
+
+
+#select only ID, course, enrolled indicator, and term for this data set
+Check_Data_Long_Data <- Check_Data_Long_Data %>% 
+  dplyr::select(UNIQUE_ID, TERM_CODE, COURSE_CODE)
+
+#inspect frame
+Check_Data_Long_Data
+
+```
+
+
+```{r}
+#write csv file to manipulate as Excel and get rid of NAs and replacing them with blanks. I also added "Ignore" into the Check_1, Check_2, and Check_3 columns instead of TRUE or FALSE to relect if the student took that course.
+write.csv(Check_Data_Long_Data1,"Final_Data.csv", row.names = FALSE)
+```
+
+```{r}
+#load new manipulated data
+Check_Data_Long_Data2<-  read_excel("Final_Data.xlsx", sheet = 1, col_names = T, guess_max = 100)
+
+Check_Data_Long_Data2 <- Check_Data_Long_Data2 %>% 
+  filter(Check_1 %in% c("Ignore","TRUE"))
+
+Check_Data_Long_Data2
+```
+```{r}
+Check_Data_Long_Data2 <- Check_Data_Long_Data2 %>% 
+  filter(Check_2 %in% c("Ignore","TRUE"))
+
+Check_Data_Long_Data2
+```
+```{r}
+Check_Data_Long_Data2 <- Check_Data_Long_Data2 %>% 
+  filter(Check_3 %in% c("Ignore","TRUE"))
+
+Check_Data_Long_Data2
+```
+
+
+```{r}
+#write csv file to manipulate as Excel
+write.csv(Check_Data_Long_Data2,"Corrected_Data.csv", row.names = FALSE)
+```
+
+```{r}
+#load data
+LPData <-  read_excel("Check_Data.xlsx", sheet = 1, col_names = T, guess_max = 100)
+
+Filtered_Data_Use<- merge(LPData, Check_Data_Long_Data2,  by.x = "BANNER_ID", by.y = "UNIQUE_ID")
+
+#write csv file to manipulate as Excel
+write.csv(Filtered_Data_Use,"Use_This_Data.csv", row.names = FALSE)
+
+#After this is exported, columns I-O are eliminated and the file is saved as an Excel file
+```
+
+```{r}
+
+#load libraries
+library(readr)
+library(readxl)
+library(tidyverse)
+library(ggalluvial)
+library(lubridate)
+
+#after the CSV export, save as excel file and change NA's to "Did Not Enroll" and the UNIQUE_IDs to just the banner IDs
+#load new manipulated data
+#make sure that data is filtered to be grouped by ID but is in the correct course sequence before loading in
+#change Y to "1" and N to "0"
+Check_Data<-  read_excel("Use_This_Data_DS.xlsx", sheet = 1, col_names = T, guess_max = 100)
+```
+
+```{r}
+#This builds a new column for us to capture their behavior in all four courses 
+Check_Data$NewColumn<- 0
+
+#This sets up the logic to check what they were doing if they didn't enroll in one of the four chemistry courses
+for (i in 2:nrow(Check_Data)) {
+  if(Check_Data$BANNER_ID[i] != Check_Data$BANNER_ID[i-1]){
+    next
+  }  else {
+    if(Check_Data$ENROLLED_ID[i]=='Not Enrolled' && 
+       Check_Data$ENROLLED_ID[i-1]=='Enrolled' && 
+       Check_Data$RETURNED_NEXT_TERM_IND[i-1]== 1){
+          Check_Data$NewColumn[i]<-'Took Non-Chemistry Course'
+    }
+    else {
+      if (Check_Data$ENROLLED_ID[i]=='Not Enrolled' &&
+        Check_Data$ENROLLED_ID[i-1]=='Enrolled' &&
+        Check_Data$RETURNED_NEXT_TERM_IND[i-1]== 0){
+          if(Check_Data$GRADUATION[i-1]== 1){
+          Check_Data$NewColumn[i]<-'Graduated'
+        }
+    
+    else {
+     if(Check_Data$ENROLLED_ID[i]=='Not Enrolled' &&
+        Check_Data$ENROLLED_ID[i-1]=='Enrolled' &&
+        Check_Data$RETURNED_NEXT_TERM_IND[i-1]== 0){
+          if(Check_Data$GRADUATION[i-1]== 0 && 
+             Check_Data$TRANSFER_IND[i-1]== 0){
+          Check_Data$NewColumn[i]<-'Not Returned'
+          }
+    else {
+      if (Check_Data$ENROLLED_ID[i]=='Not Enrolled' &&
+        Check_Data$ENROLLED_ID[i-1]=='Enrolled' &&
+        Check_Data$RETURNED_NEXT_TERM_IND[i-1]== 0){
+          if(Check_Data$GRADUATION[i-1]== 0 && 
+             Check_Data$TRANSFER_IND[i-1]== 1){
+          Check_Data$NewColumn[i]<-'Transferred'
+          }
+        }
+   }
+  }
+   }
+      }
+    }
+  }
+}
+    
+```
+
+```{r}
+#this carries over enrolled status for students who are enrolled
+for (i in 1:nrow(Check_Data)) {
+    if(Check_Data$NewColumn [i]== 0 && 
+       Check_Data$ENROLLED_ID[i]=='Enrolled'){
+          Check_Data$NewColumn[i]<-'Enrolled'
+    }
+  }
+```
+
+
+```{r}
+#This will carry over the status of students who don't enroll for multiple consecutive courses
+for (i in 2:nrow(Check_Data)) {
+  if(Check_Data$BANNER_ID[i] != Check_Data$BANNER_ID[i-1]){
+    next
+  } 
+   else {
+     if(Check_Data$NewColumn[i]== 0 &&
+        Check_Data$NewColumn[i-1]=='Not Returned'){
+          Check_Data$NewColumn[i]<-'Not Returned'
+        } 
+    else {
+      if (Check_Data$NewColumn[i]== 0 &&
+        Check_Data$NewColumn[i-1]=='Graduated'){
+          Check_Data$NewColumn[i]<-'Graduated'
+      }
+    else {
+      if (Check_Data$NewColumn[i]== 0 &&
+        Check_Data$NewColumn[i-1]=='Took Non-Chemistry Course'){
+          Check_Data$NewColumn[i]<-'Took Non-Chemistry Course'
+      }
+    else {
+      if (Check_Data$NewColumn[i]== 0 &&
+        Check_Data$NewColumn[i-1]=='Transferred'){
+          Check_Data$NewColumn[i]<-'Transferred'
+        }
+  }
+   }
+  }
+   }
+}
+```
+
+```{r}
+#Any zeros that remain here are because the student never enrolled in the class and started the sequence after Chem 1. "Not Enrolled" will now capture that they were a late starter to the sequence.
+for (i in 1:nrow(Check_Data)) {
+    if(Check_Data$NewColumn [i]== 0 && 
+       Check_Data$ENROLLED_ID[i]=='Not Enrolled'){
+          Check_Data$NewColumn[i]<-'Not Enrolled'
+    }
+  }
+```
+
+```{r}
+#making new column for filtering indicator based on dates
+Check_Data$FILTER_IND<- 0
+
+#Filter out by date 
+for (i in 1:nrow(Check_Data)){
+   if (Check_Data$ENROLLED_ID[i] =='Not Enrolled'){
+    next
+        }
+ else {
+  if (Check_Data$COURSE_CODE [i] == 'CHEM_1210' &&
+      Check_Data$ENROLLED_ID [i] == 'Enrolled' &&
+      (Check_Data$TERM_CODE [i] == '202020'||
+      Check_Data$TERM_CODE [i] == '201940'||
+      Check_Data$TERM_CODE [i] == '201930'))
+    {
+    Check_Data$FILTER_IND[i]<- 'Filter Out'
+  }
+  else {
+     if(Check_Data$COURSE_CODE [i] == 'CHEM_1220' &&
+      Check_Data$ENROLLED_ID [i] == 'Enrolled' &&
+      Check_Data$COURSE_CODE [i-1] == 'CHEM_1210' &&
+      Check_Data$ENROLLED_ID [i-1] == 'Not Enrolled' &&
+      (Check_Data$TERM_CODE [i] == '202020'||
+      Check_Data$TERM_CODE [i] == '201940'))
+     {
+       Check_Data$FILTER_IND[i]<- 'Filter Out'
+     }
+    else {
+     if(Check_Data$COURSE_CODE [i] == 'CHEM_2310' &&
+      Check_Data$ENROLLED_ID [i] == 'Enrolled' &&
+      Check_Data$COURSE_CODE [i-1] == 'CHEM_1220' &&
+      Check_Data$ENROLLED_ID [i-1] == 'Not Enrolled' &&
+      Check_Data$COURSE_CODE [i-2] == 'CHEM_1210' &&
+      Check_Data$ENROLLED_ID [i-2] == 'Not Enrolled' &&
+      Check_Data$TERM_CODE [i] == '202020')
+     {
+       Check_Data$FILTER_IND[i]<- 'Filter Out'
+     }
+    }
+        
+      }
+        }
+  }
+
+```
+
+```{r}
+for (i in 2:nrow(Check_Data)) {
+  if(Check_Data$BANNER_ID[i] != Check_Data$BANNER_ID[i-1]){
+    next
+  } 
+  else {
+    if(Check_Data$FILTER_IND[i-1]=='Filter Out'){
+    Check_Data$FILTER_IND[i]<- 'Filter Out'
+    }
+  }
+}
+```
+
+
+
+```{r}
+#write csv file to manipulate as Excel
+write.csv(Check_Data,"ACTUAL CORRECT DATA_DS.csv", row.names = FALSE)
+```
+
+
+
+
