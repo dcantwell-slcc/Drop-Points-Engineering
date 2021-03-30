@@ -1,0 +1,110 @@
+---
+title: "CE Munging"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Below I created a dataframe to hard code your levels once. We will then reference this throughout the rest of the code so there are limited locations for error. 
+```{r}
+  levels <- data.frame( level1 = c("CHEM_1210","CHE_1040", ""),
+                        level2 = c("CHEM_1220", "PHYS_2210", "ENGR_2950"),
+                        level3 = c("CHEM_2310", "ENGR_2300", ""),
+                        level4 = c("CHE_2800", "CHE_2450", ""))
+```
+The blank spaces are to keep the rows even. 
+
+Next up, we filtered and selected the minimum courses needed. Then found places where a course per level existed. If you want to see what the code does to a certain point, copy it into the console and after the chain put `view()` and you can see how the dataframe changes over the different chained events. One day, we will look back at that last `if_else` statement and laugh, but it works pretty well. I ended with a self join! The old DF filtered to just the courses we are interested in. 
+```{r}
+DPE_clean_CE<-  Data_clean %>% 
+    #we are going to have to self join
+    dplyr::select(BANNER_ID, COURSE_CODE) %>% 
+    filter(COURSE_CODE %in% c(levels$level1, levels$level2, levels$level3, levels$level4)) %>% 
+    group_by(BANNER_ID) %>% 
+    mutate(Level = case_when(COURSE_CODE %in% levels$level1 ~ "Level1",
+                             COURSE_CODE %in% levels$level2 ~ "Level2",
+                             COURSE_CODE %in% levels$level3 ~ "Level3",
+                             COURSE_CODE %in% levels$level4 ~ "Level4")) %>% 
+    ungroup() %>% 
+    #pull most recent information for each person
+    #behavior for the max(term) by level
+    pivot_wider(id_cols = c(BANNER_ID), names_from = Level, values_from = COURSE_CODE) %>% 
+    group_by(BANNER_ID) %>% #I'm not convinced I need this
+    mutate( 
+      #Level 1 individuals are in chem 1210 AND che 1040
+      Level1 = if_else((grepl(levels$level1[1], Level1) & grepl(levels$level1[2], Level1)), "Y", "N"),
+      #Level 2 individuals have to have taken chem_1220 and phys_2210 and engr_2950
+      Level2 = if_else((grepl(levels$level2[1], Level2) &grepl(levels$level2[2], Level2)&
+                          grepl(levels$level2[3], Level2)), "Y", "N"),
+      #Level 3 individuals have to take chem_2310 and ENGR_2300
+      Level3 = if_else((grepl(levels$level3[1], Level3) & grepl(levels$level3[2], Level3)), "Y", "N"),
+      #Level 4 individuals have to have taken che_2800 and che_2450
+      Level4 = if_else((grepl(levels$level4[1], Level4) & grepl(levels$level4[2], Level4)), "Y", "N")) %>% 
+    ungroup() %>% 
+    #remove anyone who wasn't in any level
+    group_by(BANNER_ID) %>% 
+    filter(grepl("Y", Level1) | grepl("Y", Level2) | grepl("Y", Level3) | grepl("Y", Level4)) %>% 
+    ungroup() %>% 
+  left_join(Data_clean %>%   filter(COURSE_CODE %in% c(levels$level1, levels$level2, levels$level3, levels$level4)), 
+            by = c("BANNER_ID")) %>% view() 
+```
+
+
+
+```{r}
+#I need to limit this down to just one line that is the most recent term per student
+#for this data frame, we are only keeping their earliest course in the progression to see how many students are doing the progression
+DPE_frame_CE <- DPE_clean_CE %>% 
+  dplyr::select(BANNER_ID, Level1, Level2, Level3, Level4, RETURNED_NEXT_TERM_IND, GRADUATION, TERM_CODE, TRANSFER_IND) %>% 
+  # Make groups for each student + term combination
+  group_by(BANNER_ID) %>% 
+  # Put the most recent term at the top
+  arrange(desc(BANNER_ID), desc(TERM_CODE)) %>% 
+  # Keep the first row only
+  slice(1)
+test_CE<-DPE_frame_CE %>%
+mutate(Level1 = case_when((Level1 == "Y") ~ "Enrolled", 
+                        (Level1 == "N") ~ "Did Not Enroll"),
+       Level2 = case_when((Level2 =="Y") ~ "Enrolled",
+                        (Level1 =="Enrolled" & Level2 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="N" & TRANSFER_IND =="N") ~ "Left",
+                        (Level1 =="Enrolled" & Level2 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="Y") ~ "Graduated",
+                        (Level1 =="Enrolled" & Level2 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="N" & TRANSFER_IND =="Y") ~ "Transferred",
+                        (Level1 =="Enrolled" & Level2 =="N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="N") ~ "Took Non-CE Courses",
+                        (Level1 =="Did Not Enroll" & Level2 =="N" ) ~ "Did Not Enroll"),
+       Level3 = case_when((Level3 =="Y") ~ "Enrolled",
+                        (Level2 =="Transferred" & Level3 =="N") ~ "Transferred",
+                        (Level2 =="Graduated" & Level3 =="N") ~ "Graduated",
+                        (Level2 =="Took Non-CE Courses" & Level3 =="N") ~ "Took Non-CE Courses",
+                        (Level2 == "Left" & Level3 =="N") ~ "Left",
+                        (Level2 =="Enrolled" & Level3 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="N" & TRANSFER_IND =="N") ~ "Left",
+                        (Level2 =="Enrolled" & Level3 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="Y") ~ "Graduated",
+                        (Level2 =="Enrolled" & Level3 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="N" & TRANSFER_IND =="Y") ~ "Transferred",
+                        (Level2 =="Enrolled" & Level3 =="N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="N") ~ "Took Non-CE Courses",
+                        (Level1 =="Did Not Enroll" & Level2 =="Did Not Enroll" & Level3== "N") ~ "Did Not Enroll",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="Y" & TRANSFER_IND =="Y" & (RETURNED_NEXT_TERM_IND > GRADUATION & RETURNED_NEXT_TERM_IND > TRANSFER_IND)) ~ "Took Non-CE courses",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="Y" & TRANSFER_IND =="Y" & ( GRADUATION >RETURNED_NEXT_TERM_IND & GRADUATION > TRANSFER_IND)) ~ "Graduated",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="Y" & TRANSFER_IND =="Y" & ( TRANSFER_IND >RETURNED_NEXT_TERM_IND & TRANSFER_IND > GRADUATION)) ~ "Transferred",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="Y" & TRANSFER_IND =="N" & (RETURNED_NEXT_TERM_IND > GRADUATION & RETURNED_NEXT_TERM_IND > TRANSFER_IND)) ~ "Took Non-CE courses",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="Y" & TRANSFER_IND =="N" & ( GRADUATION >RETURNED_NEXT_TERM_IND & GRADUATION > TRANSFER_IND)) ~ "Graduated",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="Y" & TRANSFER_IND =="N" & ( TRANSFER_IND >RETURNED_NEXT_TERM_IND & TRANSFER_IND > GRADUATION)) ~ "Transferred",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="N" & TRANSFER_IND =="Y" & (RETURNED_NEXT_TERM_IND > GRADUATION & RETURNED_NEXT_TERM_IND > TRANSFER_IND)) ~ "Took Non-CE courses",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="N" & TRANSFER_IND =="Y" & ( GRADUATION >RETURNED_NEXT_TERM_IND & GRADUATION > TRANSFER_IND)) ~ "Graduated",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="N" & TRANSFER_IND =="Y" & ( TRANSFER_IND >RETURNED_NEXT_TERM_IND & TRANSFER_IND > GRADUATION)) ~ "Transferred",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="Y" & TRANSFER_IND =="Y" & (RETURNED_NEXT_TERM_IND > GRADUATION & RETURNED_NEXT_TERM_IND > TRANSFER_IND)) ~ "Took Non-CE courses",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="Y" & TRANSFER_IND =="Y" & ( GRADUATION >RETURNED_NEXT_TERM_IND & GRADUATION > TRANSFER_IND)) ~ "Graduated",
+                        (Level3== "N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="Y" & TRANSFER_IND =="Y" & ( TRANSFER_IND >RETURNED_NEXT_TERM_IND & TRANSFER_IND > GRADUATION)) ~ "Transferred",
+                       ),
+       Level4 = case_when((Level4 =="Y") ~ "Enrolled",
+                        (Level3 =="Transferred" & Level4 =="N") ~ "Transferred",
+                        (Level3 =="Graduated" & Level4 =="N") ~ "Graduated",
+                        (Level3 =="Took Non-CE Courses" & Level4 =="N") ~ "Took Non-CE Courses",
+                        (Level3 == "Left" & Level4 =="N") ~ "Left",
+                        (Level3 =="Enrolled" & Level4 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="N" & TRANSFER_IND =="N") ~ "Left",
+                        (Level3 =="Enrolled" & Level4 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="Y") ~ "Graduated",
+                        (Level3 =="Enrolled" & Level4 =="N" & RETURNED_NEXT_TERM_IND=="N" & GRADUATION =="N" & TRANSFER_IND =="Y") ~ "Transferred",
+                        (Level3 =="Enrolled" & Level4 =="N" & RETURNED_NEXT_TERM_IND=="Y" & GRADUATION =="N") ~ "Took Non-CE Courses"))
+                       
+                        
+```
