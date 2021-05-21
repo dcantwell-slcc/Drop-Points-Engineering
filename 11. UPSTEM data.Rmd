@@ -1,0 +1,79 @@
+---
+title: "11. UPSTEM data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+upstem_data <-  read_csv("/Users/devoncantwell/Documents/GitHub/drop-points-engineering/data/UPSTEM_updated.csv") %>% 
+mutate(TERM_CODE = as.numeric(as.character(TERM_CODE)),
+       LAST_TERM_SLCC = as.numeric(as.character(LAST_TERM_SLCC))) %>%
+replace_na(list(DEGREE_TYPE_SLCC = "No Degree"))
+
+table(upstem_data$DEGREE_TYPE_SLCC)
+
+is.factor(upstem_data$DEGREE_TYPE_SLCC)
+```
+
+
+```{r}
+upstem_clean <- upstem_data %>% 
+  mutate(COURSE_CODE = paste0(SUBJECT, "_", NUMBER)) %>% 
+  filter(MATH_1210 %in% c("A",
+"A-",
+"B",
+"B-",
+"B+",
+"C",
+"C-",
+"C+",
+"D",
+"D-",
+"D+",
+"E",
+"P") & between(TERM_CODE, 201520, 202120)) %>% 
+filter(PHYS_2210 %in% c("A",
+"A-",
+"B",
+"B-",
+"B+",
+"C",
+"C-",
+"C+",
+"D",
+"D-",
+"D+",
+"E",
+"P") & between(TERM_CODE, 201520, 202120)) %>% 
+filter(CHEM_1210 %in% c("A",
+"A-",
+"B",
+"B-",
+"B+",
+"C",
+"C-",
+"C+",
+"D",
+"D-",
+"D+",
+"E",
+"P" ) 
+& between(TERM_CODE, 201520, 202120))
+
+
+
+```
+
+
+```{r}
+Next steps for tomorrow
+- get the csv to load correctly 
+- graphs showing degree and no degree
+- graphs showing majors at slcc and at the u
+- graphs showing demographic breakdowns
+- by term graphs
+```
+
