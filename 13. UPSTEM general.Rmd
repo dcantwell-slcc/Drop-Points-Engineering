@@ -1,0 +1,505 @@
+---
+title: "13. UPSTEM general"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+upstem_ce<-upstem_clean %>%
+  filter(COURSE_CODE %in% c("CHEM_1210","CH EN_1703", "CHEM_1220", "PHYS_2210", "CH EN_1703", "CH EN_2310", "CH EN_2300","CH EN_2800", "CH EN_2450")) %>% 
+  mutate(SLCC_COURSE_CODE= recode(COURSE_CODE,  "CH EN_1703"="CHE_1040", "CH EN_2310" = "CHEM_2310","CH EN_2300" = "ENGR_2300", "CH EN_2800" = "CHE_2800", "CH EN_2450"= "CHE_2450", "CHEM_1210"= "CHEM_1210",  "CHEM_1220"= "CHEM_1220", "PHYS_2210" = "PHYS_2210" )) %>%
+    mutate(MAJOR_SLCC_CAT= recode(MAJOR_SLCC, "Chemistry"="STEM, Non-Engineering", "Engineering/Materials Science" = "Engineering","Pre-Health Sciences" = "STEM, Non-Engineering", "Engineering/Chemical" = "Engineering", "Environmental Geology"= "STEM, Non-Engineering", "Psychology"= "STEM, Non-Engineering",  "Engineering/Civil/Environ"= "Engineering", "General Studies" = "General Studies", "Engineering/Electrical"="Engineering", "Physics"="STEM, Non-Engineering" )) %>%
+  mutate(PELL= recode(PELL, "Y"= "Yes", "N"= "No")) %>%
+  mutate(ETHNICITY = as.factor(ETHNICITY))
+
+upstem_ce$ETHNICITY<- factor(upstem_ce$ETHNICITY, levels =c("White", "Asian", "More than One", "Hispanic", "Black","Unknown", "Non-Resident Alien"), ordered = TRUE)
+
+upstem_ce$MAJOR_SLCC_CAT<- factor(upstem_ce$MAJOR_SLCC_CAT, levels =c("Engineering", "STEM, Non-Engineering", "General Studies", "Other"), ordered = TRUE)
+
+upstem_ee<-upstem_clean %>%
+  filter(COURSE_CODE %in% c("CHEM_1210","ECE_1900", "ECE_1040", "ECE_2240", "ECE_2280")) %>%
+  mutate(SLCC_COURSE_CODE= recode(COURSE_CODE,"CHEM_1210"= "CHEM_1210","ECE_1900"="EE_1010","ECE_1040"= "EE_1270","ECE_2240"= "EE_2260", "ECE_2280"= "EE_2280")) %>%
+  mutate(MAJOR_SLCC_CAT= recode(MAJOR_SLCC, "Engin.Design/Draft. Technology"="Engineering", "General Studies" = "General Studies", "Engineering/Civil/Environ"= "Engineering","Manufacturing Engineering Tech"= "Engineering", "Engineering/Computer" = "Engineering", "Psychology"= "STEM, Non-Engineering", "Engineering/Electrical"="Engineering")) %>%
+    mutate(PELL= recode(PELL, "Y"= "Yes", "N"= "No")) %>%
+  mutate(ETHNICITY = as.factor(ETHNICITY))
+
+upstem_ee$ETHNICITY<- factor(upstem_ee$ETHNICITY, levels =c("White", "Asian", "More than One", "Hispanic", "Black","Unknown", "Non-Resident Alien"), ordered = TRUE)
+
+upstem_ee$MAJOR_SLCC_CAT<- factor(upstem_ee$MAJOR_SLCC_CAT, levels =c("Engineering", "STEM, Non-Engineering", "General Studies", "Other"), ordered = TRUE)
+
+upstem_me<-upstem_clean %>%
+  filter(COURSE_CODE %in% c("CHEM_1210","ME EN_1010", "MATH_1220", "ME EN_1000", "ME EN_2550", "ME EN_2010", "ME EN_2650","ME EN_2450")) %>%
+   mutate(SLCC_COURSE_CODE= recode(COURSE_CODE,"CHEM_1210"= "CHEM_1210", "ME EN_1010" = "ENGR_1030", "MATH_1220"= "MATH_1220", "ME EN_1000"= "MEEN_1000", "ME EN_2550" = "ENGR_2550", "ME EN_2010"= "ENGR_2010", "ME EN_2650" = "MEEN_2650","ME EN_2450"= "ENGR_2450")) %>%
+    mutate(MAJOR_SLCC_CAT= recode(MAJOR_SLCC, "Biology"= "STEM, Non-Engineering",  "Engineering/Electrical"="Engineering", "General Studies" = "General Studies", "Chemistry/Physical Sci"= "STEM, Non-Engineering","Engineering/Materials Science" = "Engineering", "Machining Technology" = "STEM, Non-Engineering", "Computer Sci & Info Systems"= "STEM, Non-Engineering", "Engineering/Mechanical" = "Engineering", "Manufacturing Engineering Tech"= "Engineering", "Engineering/Civil/Environ"= "Engineering", "English as a Second Language"= "Other", "Psychology"="STEM, Non-Engineering")) %>%
+    mutate(PELL= recode(PELL, "Y"= "Yes", "N"= "No")) %>%
+  mutate(ETHNICITY = as.factor(ETHNICITY))
+
+upstem_me$ETHNICITY<- factor(upstem_me$ETHNICITY, levels =c("White", "Asian", "More than One", "Hispanic", "Black","Unknown", "Non-Resident Alien"), ordered = TRUE)
+
+upstem_me$MAJOR_SLCC_CAT<- factor(upstem_me$MAJOR_SLCC_CAT, levels =c("Engineering", "STEM, Non-Engineering", "General Studies", "Other"), ordered = TRUE)
+
+upstem_civ<-upstem_clean %>%
+  filter(COURSE_CODE %in% c("CHEM_1210","CVEEN_1400", "CVEEN_2010", "CVEEN_2000", "CVEEN_2750", "CVEEN_2300", "CVEEN_1400","CVEEN_2410", "MG EN_2400", "CVEEN_2310"))%>%
+  mutate(SLCC_COURSE_CODE= recode(COURSE_CODE,"CHEM_1210"= "CHEM_1210", "CVEEN_1400"= "CEEN_1100", "CVEEN_2010"= "ENGR_2010", "CVEEN_2000"= "ENGR_2950", "CVEEN_2750"= "ENGR_1040", "CVEEN_2300"= "ENGR_2320", "CVEEN_1400"= "ARCH_1310", "CVEEN_2410"= "CEEN_2240","MG EN_2400"= "CEEN_2240", "CVEEN_2310"= "ENGR_2550"))%>%
+  mutate(MAJOR_SLCC_CAT= recode(MAJOR_SLCC, "Engineering/Civil/Environ"= "Engineering","Engineering/Mechanical" = "Engineering", "General Studies" = "General Studies","Psychology"="STEM, Non-Engineering")) %>%
+    mutate(PELL= recode(PELL, "Y"= "Yes", "N"= "No")) %>%
+  mutate(ETHNICITY = as.factor(ETHNICITY))
+
+upstem_civ$ETHNICITY<- factor(upstem_civ$ETHNICITY, levels =c("White", "Asian", "More than One", "Hispanic", "Black","Unknown", "Non-Resident Alien"), ordered = TRUE)
+
+upstem_civ$MAJOR_SLCC_CAT<- factor(upstem_civ$MAJOR_SLCC_CAT, levels =c("Engineering", "STEM, Non-Engineering", "General Studies", "Other"), ordered = TRUE)
+
+```
+
+```{r}
+library(patchwork)
+
+ce_upstem_courses <- upstem_ce %>% 
+  group_by(SLCC_COURSE_CODE, DEGREE_IND) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ce_courses_upstem_viz<- ce_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= DEGREE_IND)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  scale_x_continuous(breaks=seq(0,15,5))+
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6", "#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Chemical Engineering")
+
+me_upstem_courses <- upstem_me %>% 
+  group_by(SLCC_COURSE_CODE, DEGREE_IND) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+me_courses_upstem_viz<- me_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= DEGREE_IND)) +
+  geom_col() +
+      theme(legend.position = "right",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Mechanical Engineering")
+
+ee_upstem_courses <- upstem_ee %>% 
+  group_by(SLCC_COURSE_CODE, DEGREE_IND) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ee_courses_upstem_viz<- ee_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= DEGREE_IND)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  scale_x_continuous(breaks=seq(0,15,5))+
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Electrical Engineering")
+
+civ_upstem_courses <- upstem_civ %>% 
+  group_by(SLCC_COURSE_CODE, DEGREE_IND) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+civ_courses_upstem_viz<- civ_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= DEGREE_IND)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Civil Engineering")
+
+(ce_courses_upstem_viz | me_courses_upstem_viz)/ (ee_courses_upstem_viz | civ_courses_upstem_viz)  &
+  plot_annotation(title = "Course Taking Behavior of UPSTEM students by Degree Type", theme = theme(plot.title = element_text(size = 16, family = "serif")))  
+
+```
+```{r}
+ce_upstem_courses <- upstem_ce %>% 
+  group_by(SLCC_COURSE_CODE, ETHNICITY) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ce_courses_upstem_eth_viz<- ce_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= ETHNICITY)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  scale_x_continuous(breaks=seq(0,15,5))+
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6", "#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Chemical Engineering")
+
+me_upstem_courses <- upstem_me %>% 
+  group_by(SLCC_COURSE_CODE, ETHNICITY) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+me_courses_upstem_eth_viz<- me_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= ETHNICITY)) +
+  geom_col() +
+      theme(legend.position = "bottom",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  labs(fill = "Ethnicity")+
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Mechanical Engineering")
+
+ee_upstem_courses <- upstem_ee %>% 
+  group_by(SLCC_COURSE_CODE, ETHNICITY) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ee_courses_upstem_eth_viz<- ee_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= ETHNICITY)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  scale_x_continuous(breaks=seq(0,15,5))+
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Electrical Engineering")
+
+civ_upstem_courses <- upstem_civ %>% 
+  group_by(SLCC_COURSE_CODE, ETHNICITY) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+civ_courses_upstem_eth_viz<- civ_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= ETHNICITY)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Civil Engineering")
+
+(ce_courses_upstem_eth_viz | me_courses_upstem_eth_viz)/ (ee_courses_upstem_eth_viz | civ_courses_upstem_eth_viz) + guide_area() + plot_layout(guides = "collect")  &
+  plot_annotation(title = "Course Taking Behavior of UPSTEM students by Ethnicity", theme = theme(plot.title = element_text(size = 16, family = "serif"))) 
+
+```
+```{r}
+ce_upstem_courses <- upstem_ce %>% 
+  group_by(SLCC_COURSE_CODE, GENDER) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ce_courses_upstem_viz<- ce_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= GENDER)) +
+  geom_col() +
+      theme(legend.position = "bottom",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  labs(fill = "Gender")+
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6", "#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Chemical Engineering")
+
+me_upstem_courses <- upstem_me %>% 
+  group_by(SLCC_COURSE_CODE, GENDER) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+me_courses_upstem_viz<- me_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= GENDER)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Mechanical Engineering")
+
+ee_upstem_courses <- upstem_ee %>% 
+  group_by(SLCC_COURSE_CODE, GENDER) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ee_courses_upstem_viz<- ee_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= GENDER)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Electrical Engineering")
+
+civ_upstem_courses <- upstem_civ %>% 
+  group_by(SLCC_COURSE_CODE, GENDER) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+civ_courses_upstem_viz<- civ_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= GENDER)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Civil Engineering")
+
+(ce_courses_upstem_viz | me_courses_upstem_viz)/ (ee_courses_upstem_viz | civ_courses_upstem_viz) + guide_area() + plot_layout(guides = "collect")  &
+  plot_annotation(title = "Course Taking Behavior of UPSTEM students by Gender", theme = theme(plot.title = element_text(size = 16, family = "serif")))  
+```
+```{r}
+ce_upstem_courses <- upstem_ce %>% 
+  group_by(SLCC_COURSE_CODE, PELL) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ce_courses_upstem_viz<- ce_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= PELL)) +
+  geom_col() +
+      theme(legend.position = "bottom",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  labs(fill = "Pell Grant Eligibile")+
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6", "#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Chemical Engineering")
+
+me_upstem_courses <- upstem_me %>% 
+  group_by(SLCC_COURSE_CODE, PELL) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+me_courses_upstem_viz<- me_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= PELL)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Mechanical Engineering")
+
+ee_upstem_courses <- upstem_ee %>% 
+  group_by(SLCC_COURSE_CODE, PELL) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ee_courses_upstem_viz<- ee_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= PELL)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Electrical Engineering")
+
+civ_upstem_courses <- upstem_civ %>% 
+  group_by(SLCC_COURSE_CODE, PELL) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+civ_courses_upstem_viz<- civ_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= PELL)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#109AD6","#0F4890", "#BCDDF4", "#ECAA20","#CA8B2A", "#843F23")) + 
+    ggtitle("Civil Engineering")
+
+(ce_courses_upstem_viz | me_courses_upstem_viz)/ (ee_courses_upstem_viz | civ_courses_upstem_viz) + guide_area() + plot_layout(guides = "collect") &
+  plot_annotation(title = "Course Taking Behavior of UPSTEM students by Pell Status", theme = theme(plot.title = element_text(size = 16, family = "serif"))) 
+```
+```{r}
+ce_upstem_courses <- upstem_ce %>% 
+  group_by(SLCC_COURSE_CODE, MAJOR_SLCC_CAT) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ce_courses_upstem_viz<- ce_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= MAJOR_SLCC_CAT)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#ECAA20", "#109AD6",  "#0F4890", "#4CB0D0")) + 
+    ggtitle("Chemical Engineering")
+
+me_upstem_courses <- upstem_me %>% 
+  group_by(SLCC_COURSE_CODE, MAJOR_SLCC_CAT) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+me_courses_upstem_viz<- me_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= MAJOR_SLCC_CAT)) +
+  geom_col() +
+      theme(legend.position = "bottom",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#ECAA20", "#109AD6",  "#0F4890", "#843F23")) + 
+    ggtitle("Mechanical Engineering")
+
+ee_upstem_courses <- upstem_ee %>% 
+  group_by(SLCC_COURSE_CODE, MAJOR_SLCC_CAT) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+ee_courses_upstem_viz<- ee_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= MAJOR_SLCC_CAT)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#ECAA20", "#109AD6",  "#0F4890", "#4CB0D0")) + 
+    ggtitle("Electrical Engineering")
+
+civ_upstem_courses <- upstem_civ %>% 
+  group_by(SLCC_COURSE_CODE, MAJOR_SLCC_CAT) %>% 
+  summarize(courses = n_distinct(STUDENT_KEY))
+
+civ_courses_upstem_viz<- civ_upstem_courses %>%
+ggplot(aes(x = courses, y = SLCC_COURSE_CODE, fill= MAJOR_SLCC_CAT)) +
+  geom_col() +
+      theme(legend.position = "none",
+        axis.line = element_line(color = "black"),  
+    panel.background = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size= 8),  
+    axis.text.x = element_text( color = "black",  size = 9,  angle = 0,  hjust = .5),  
+    axis.text.y = element_text( size = 8,  color = "black"),  
+    plot.title = element_text(hjust = 0.5, size = 12),  
+    text=element_text(size = 8, family = "serif")) +
+  xlab("Number of Students") +
+  scale_fill_manual(values= c("#ECAA20", "#109AD6",  "#0F4890", "#4CB0D0")) + 
+    ggtitle("Civil Engineering")
+
+(ce_courses_upstem_viz | me_courses_upstem_viz)/ (ee_courses_upstem_viz | civ_courses_upstem_viz) + guide_area() + plot_layout(guides = "collect")  &
+  plot_annotation(title = "Course Taking Behavior of UPSTEM students by SLCC Major", theme = theme(plot.title = element_text(size = 16, family = "serif"))) 
+```
+```{r}
+# slcc gpa vs gpa at the U 
+
+#degree v no degree gpa
+
+ggplot(upstem_clean, aes(x=`gpa u`, y=`last term gpa`,color=DEGREE_IND)) + 
+  geom_point()+
+  theme(text=element_text(size = 12, family = "serif"))+
+  labs(color = "Degree")+
+  scale_color_manual(values=c("#ECAA20", "#109AD6")) + 
+  ggtitle("SLCC GPA vs. U of U GPA by Degree Status") +
+  xlab("U of U GPA") + 
+  ylab("SLCC GPA")
+
+```
+
